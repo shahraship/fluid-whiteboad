@@ -37,7 +37,7 @@ export class WbComponent implements OnInit {
     this.svgViewBox = '0 0 ' + this.dimensions.width + ' ' + this.dimensions.height;
   }
 
-  trackByFn(index: number): number {
+  public trackByFn(index: number): number {
     return index;
   }
 
@@ -62,7 +62,7 @@ export class WbComponent implements OnInit {
     return svgEvent;
   }
 
-  matrixArr(nums: number[]): string {
+  public matrixArr(nums: number[]): string {
     return 'matrix(' + nums.join(' ') + ')';
   }
 
