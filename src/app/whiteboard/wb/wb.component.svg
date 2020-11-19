@@ -1,0 +1,21 @@
+<svg
+    preserveAspectRatio="xMinYMin meet"
+    [attr.viewBox]="svgViewBox ? svgViewBox : null"
+>
+    <ng-container *ngFor="let svgElement of svgElements; trackBy: trackByFn; let elementIndex = index;">
+        <ng-container [ngSwitch]="svgElement.elementType">
+            <ng-container *ngSwitchCase="SvgElementTypesEnum.POLYLINE">
+                <path
+                    fill="none"
+                    shape-rendering="geometricPrecision"
+                    stroke-linejoin="round"
+                    [attr.strokeWidth]="svgElement.elementAttributes.strokeWidth"
+                    [attr.strokeShadowblur]="svgElement.elementAttributes.strokeShadowblur"
+                    [attr.stroke]="svgElement.elementAttributes.stroke"
+                    [attr.d]="svgElement.elementAttributes.d"
+                    [attr.transform]="matrixArr(svgElement.elementAttributes.transform)"
+                />
+            </ng-container>
+        </ng-container>
+    </ng-container>
+</svg>
