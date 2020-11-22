@@ -12,3 +12,8 @@ export interface ISvgElement {
     elementType: SvgElementTypes;
     elementAttributes: IPathAttributes;
 }
+export interface ISvgPolyLinePath {
+    ndx: number;
+    eventType: string;
+    xy: {x: number, y: number};
+}

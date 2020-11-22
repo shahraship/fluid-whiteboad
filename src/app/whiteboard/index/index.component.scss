@@ -1,8 +1,12 @@
 :host {
     display: block;
     padding: 20px;
+    margin: 0 auto;
     height: calc(100vh - 20px);
+    overflow: auto;
     app-wb {
         background-color: #eceeef;
+        width: 500px;
+        height: 500px;
     }
 }

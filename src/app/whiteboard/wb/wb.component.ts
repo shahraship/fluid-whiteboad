@@ -1,4 +1,5 @@
-import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { ICoordinates } from 'src/app/models/coordinates';
 import { ISvgElement, SvgElementTypes } from 'src/app/models/svg-element-types';
 import { SocketService } from 'src/app/services/socket.service';
@@ -8,7 +9,7 @@ import { SocketService } from 'src/app/services/socket.service';
   templateUrl: './wb.component.svg',
   styleUrls: ['./wb.component.scss']
 })
-export class WbComponent implements OnInit {
+export class WbComponent implements OnInit, OnDestroy {
 
   /**
    * Dimensions of the container, inherited by the SVG element.
@@ -22,6 +23,7 @@ export class WbComponent implements OnInit {
    * Current element index for which the properties to update
    */
   private currentElementIndex = -1;
+  private sockSub: Subscription = new Subscription();
 
   svgViewBox = '';
   svgElements: ISvgElement[] = [];
@@ -29,12 +31,32 @@ export class WbComponent implements OnInit {
 
   constructor(
     private element: ElementRef<HTMLElement>,
-    private webSocketService: SocketService
+    private webSocketService: SocketService,
+    private cdr: ChangeDetectorRef
   ) { }
+
+  private isSvgElement(msg: object): msg is ISvgElement {
+    return (msg as ISvgElement).elementType !== undefined;
+  }
 
   ngOnInit(): void {
     this.dimensions = this.element.nativeElement.getBoundingClientRect();
     this.svgViewBox = '0 0 ' + this.dimensions.width + ' ' + this.dimensions.height;
+    this.sockSub = this.webSocketService.messageReceived$.subscribe((msg) => {
+      const payload = msg.payload;
+      if (this.isSvgElement(payload)) {
+        this.svgElements.push(payload);
+      } else {
+        if (payload.eventType === 'addPoint') {
+          this.svgElements[payload.ndx].elementAttributes.d += ' L' + payload.xy.x + ' ' + payload.xy.y;
+        }
+      }
+      this.cdr.detectChanges();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.sockSub?.unsubscribe();
   }
 
   public trackByFn(index: number): number {
@@ -84,7 +106,6 @@ export class WbComponent implements OnInit {
         transform: [1, 0, 0, 1, 0, 0]
       }
     };
-    this.svgElements.push(svgElement);
     this.webSocketService.sendMessage({ payload: svgElement });
   }
 
@@ -95,7 +116,6 @@ export class WbComponent implements OnInit {
       e.preventDefault();
       e.stopPropagation();
       const xy: ICoordinates = this.getUniversalSvgE(e);
-      this.svgElements[this.currentElementIndex].elementAttributes.d += ' L' + xy.x + ' ' + xy.y;
       this.webSocketService.sendMessage({ payload: { ndx: this.currentElementIndex, eventType: 'addPoint', xy } });
     }
   }

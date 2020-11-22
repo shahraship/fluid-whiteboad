@@ -1,3 +1,5 @@
+import { ISvgElement, ISvgPolyLinePath } from './svg-element-types';
+
 export interface ISocketMessage {
-    payload: any;
+    payload: ISvgElement | ISvgPolyLinePath;
 }
